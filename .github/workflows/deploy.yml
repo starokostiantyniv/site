@@ -31,7 +31,7 @@ jobs:
 
       - name: Build site
         env:
-          SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL }}
+          SHEET_CSV_URL: ${{ secrets.https://docs.google.com/spreadsheets/d/e/2PACX-1vSJfm-lwthFUkv7Y_mY46SnJetYdoLM7NrutbNatFOtXtA2tD3-HjoaskgSyM1Pnw/pub?gid=417554514&single=true&output=csv }}
           SITE_URL: https://starokostiantyniv.com
         run: node build.js
 
