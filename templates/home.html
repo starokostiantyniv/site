@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STAROKOSTIANTYNIV.COM — довідник закладів Старокостянтинова</title>
+    <meta name="description" content="Усі заклади Старокостянтинова в одному місці: ресторани, СТО, магазини, послуги. Пошук за назвою, категорією чи адресою.">
+    <link rel="canonical" href="{{SITE_URL}}/">
+    <link rel="sitemap" type="application/xml" href="{{SITE_URL}}/sitemap.xml">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+    <style>{{BASE_CSS}}</style>
+</head>
+<body class="home">
+
+    <div class="fixed-header" id="logoHome">
+        <div class="fixed-logo">
+            <svg viewBox="0 0 400 500" fill="currentColor">
+                <polygon points="200,30 320,140 270,140 200,80 130,140 80,140" />
+                <rect x="185" y="70" width="30" height="80" />
+                <path d="M 125,210 A 75,75 0 0,1 275,210 L 245,210 A 45,45 0 0,0 155,210 Z" />
+                <polygon points="200,238 211,274 251,264 221,290 251,316 211,306 200,342 189,306 149,316 179,290 149,264 189,274" />
+                <path d="M 100,360 Q 200,470 300,360 Q 200,420 100,360 Z" />
+            </svg>
+        </div>
+        <div class="site-title-window">
+            <div class="site-title-text" id="siteTitleText" data-text="Старокостянтинів">Старокостянтинів</div>
+        </div>
+    </div>
+
+    <div class="bg-container">
+        <div class="bg-layer" id="bgLayer1"></div>
+        <div class="bg-layer" id="bgLayer2"></div>
+    </div>
+    <div class="bg-overlay"></div>
+
+    <div class="content-container" id="contentContainer">
+        <input type="text" class="search-input" id="searchInput" placeholder="Що шукаєте?" autocomplete="off" autofocus>
+        <div class="results" id="resultsContainer"></div>
+        <div class="detail-card" id="detailCard">
+            <div class="detail-name" id="detailName"></div>
+            <div class="detail-category" id="detailCategory"></div>
+            <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> <a class="row-value row-link" id="detailAddress" target="_blank" rel="noopener noreferrer"></a></div>
+            <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> <span id="detailPhone"></span></div>
+            <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="row-value" id="detailHours"></span></div>
+            <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="row-value" id="detailRating"></span></div>
+            <div class="listing-links">
+                <a id="backToResults" href="#">← Назад</a>
+                <a id="detailFullLink" href="#">Детальніше →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="social-bar">
+        <a href="http://instagram.com/starkon.insta" target="_blank" rel="noopener noreferrer" class="social-link" title="Instagram">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@starkon.tiktok" target="_blank" rel="noopener noreferrer" class="social-link" title="TikTok">
+            <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.57-1.31 1.56-1.3 2.56.01.96.53 1.87 1.34 2.38.83.53 1.92.61 2.8.21.96-.43 1.58-1.4 1.58-2.45V.02z"/></svg>
+        </a>
+        <a href="https://www.youtube.com/@starkon1561" target="_blank" rel="noopener noreferrer" class="social-link" title="YouTube">
+            <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+    </div>
+
+    <script>
+        const SITE_URL = "{{SITE_URL}}";
+        const places = {{LISTINGS_JSON}};
+
+        function esc(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function smartQuotes(s) {
+            let str = String(s ?? '');
+            let open = true;
+            return str.replace(/"/g, () => { const q = open ? '«' : '»'; open = !open; return q; });
+        }
+
+        function reviewSuffix(n) {
+            const num = parseInt(n, 10);
+            if (isNaN(num)) return 'ів';
+            const mod10 = num % 10, mod100 = num % 100;
+            if (mod10 === 1 && mod100 !== 11) return '';
+            if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return 'и';
+            return 'ів';
+        }
+
+        function formatRating(rating, reviews) {
+            if (!rating || rating === '—') return '—';
+            if (!reviews) return rating;
+            return `${rating} · ${reviews} відгук${reviewSuffix(reviews)}`;
+        }
+
+        function telLink(phone) {
+            if (!phone || phone === '—') return '<span class="row-value">—</span>';
+            const first = phone.split(',')[0].trim();
+            const digits = first.replace(/[^\d+]/g, '');
+            return `<a class="row-value row-link" href="tel:${digits}">${esc(phone)}</a>`;
+        }
+
+        function mapsLink(address) {
+            if (!address) return '#';
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + ', Старокостянтинів')}`;
+        }
+
+        function verifiedMark(item) {
+            if (!item.verified) return '';
+            return ` <svg class="verified-mark" viewBox="0 0 24 24" fill="currentColor" title="Верифікований заклад"><path d="M12 2l2.4 1.9 3-.5 1.1 2.8 2.8 1.1-.5 3L22.7 12l-1.9 2.4.5 3-2.8 1.1-1.1 2.8-3-.5L12 22.7l-2.4-1.9-3 .5-1.1-2.8-2.8-1.1.5-3L1.3 12l1.9-2.4-.5-3 2.8-1.1L6.6 2.7l3 .5L12 2z"/><path d="M8.5 12.5l2.3 2.3 4.7-4.7" fill="none" stroke="#0a0a0e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        }
+
+        const fuseOptions = {
+            keys: [
+                { name: 'name', weight: 0.45 },
+                { name: 'tags', weight: 0.3 },
+                { name: 'category', weight: 0.2 },
+                { name: 'address', weight: 0.05 }
+            ],
+            threshold: 0.2,
+            distance: 60,
+            ignoreLocation: true,
+            minMatchCharLength: 3,
+            includeScore: true
+        };
+        const fuse = new Fuse(places, fuseOptions);
+
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const detailCard = document.getElementById('detailCard');
+        const logoHome = document.getElementById('logoHome');
+
+        let isDetailOpen = false;
+
+        function goHome() {
+            hideDetail();
+            searchInput.value = '';
+            searchInput.style.display = 'block';
+            resultsContainer.style.display = 'flex';
+            searchInput.focus();
+            renderResults('');
+        }
+        logoHome.addEventListener('click', goHome);
+
+        function renderItem(item) {
+            return `
+                <a class="result-item${item.featured ? ' featured' : ''}" href="${SITE_URL}/zaklad/${item.slug}/" data-slug="${item.slug}">
+                    ${item.featured ? '<div class="result-badge">★ Рекомендовано</div>' : ''}
+                    <div class="result-name">${esc(smartQuotes(item.name))}${verifiedMark(item)}</div>
+                    <div class="result-category">${esc(item.category)}</div>
+                    ${item.address ? `<div class="result-address">${esc(item.address)}</div>` : ''}
+                    ${item.phone ? `<div class="result-phone">${esc(item.phone)}</div>` : ''}
+                    ${item.rating ? `<div class="result-rating">★ ${esc(formatRating(item.rating, item.reviews))}</div>` : ''}
+                    ${item.hours ? `<div class="result-hours">${esc(item.hours)}</div>` : ''}
+                </a>
+            `;
+        }
+
+        function attachResultHandlers() {
+            document.querySelectorAll('.result-item').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const item = places.find(p => p.slug === this.dataset.slug);
+                    if (item) showDetail(item);
+                });
+            });
+        }
+
+        function renderResults(query) {
+            hideDetail();
+            if (!query.trim()) {
+                const featured = places.filter(p => p.featured);
+                if (featured.length === 0) {
+                    resultsContainer.innerHTML = `<div class="empty-state">почніть вводити запит</div>`;
+                    return;
+                }
+                resultsContainer.innerHTML =
+                    `<div class="results-heading">Рекомендовані заклади</div>` +
+                    featured.map(renderItem).join('');
+                attachResultHandlers();
+                return;
+            }
+            const results = fuse.search(query);
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `<div class="empty-state">нічого не знайдено</div>`;
+                return;
+            }
+            const maxResults = 20;
+            // рекомендовані підіймаємо на початок, зберігаючи релевантність усередині кожної групи
+            const sorted = [...results].sort((a, b) => (b.item.featured ? 1 : 0) - (a.item.featured ? 1 : 0));
+            const items = sorted.slice(0, maxResults);
+            let html = items.map(r => renderItem(r.item)).join('');
+            if (items.length < results.length) {
+                html += `<div class="empty-state" style="font-size:12px; padding:12px 0;">показано ${items.length} з ${results.length}</div>`;
+            }
+            resultsContainer.innerHTML = html;
+            attachResultHandlers();
+        }
+
+        function showDetail(place) {
+            isDetailOpen = true;
+            resultsContainer.style.display = 'none';
+            searchInput.style.display = 'none';
+            detailCard.classList.add('visible');
+            document.getElementById('detailName').innerHTML = esc(smartQuotes(place.name)) + verifiedMark(place);
+            document.getElementById('detailCategory').textContent = place.category;
+            const addrEl = document.getElementById('detailAddress');
+            addrEl.textContent = place.address || '—';
+            addrEl.href = mapsLink(place.address);
+            document.getElementById('detailPhone').innerHTML = telLink(place.phone);
+            document.getElementById('detailHours').textContent = place.hours || '—';
+            document.getElementById('detailRating').textContent = formatRating(place.rating, place.reviews);
+            document.getElementById('detailFullLink').href = `${SITE_URL}/zaklad/${place.slug}/`;
+        }
+
+        function hideDetail() {
+            isDetailOpen = false;
+            detailCard.classList.remove('visible');
+        }
+
+        function backToResults() {
+            hideDetail();
+            resultsContainer.style.display = 'flex';
+            searchInput.style.display = 'block';
+        }
+        document.getElementById('backToResults').addEventListener('click', (e) => {
+            e.preventDefault();
+            backToResults();
+        });
+
+        searchInput.addEventListener('input', (e) => renderResults(e.target.value));
+
+        const bgImages = ['img.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', 'img6.jpg', 'img7.jpg', 'img8.jpg', 'img9.jpg', 'img10.jpg'];
+        let currentImgIndex = 0, isMovingRight = true, activeLayerNum = 1;
+
+        function initBgSlider() {
+            const layer1 = document.getElementById('bgLayer1');
+            layer1.style.backgroundImage = `url('${bgImages[0]}')`;
+            layer1.className = 'bg-layer active pan-right-anim';
+            setInterval(changeBackground, 12000);
+        }
+        function changeBackground() {
+            currentImgIndex = (currentImgIndex + 1) % bgImages.length;
+            isMovingRight = !isMovingRight;
+            const nextLayerNum = activeLayerNum === 1 ? 2 : 1;
+            const currentLayer = document.getElementById(`bgLayer${activeLayerNum}`);
+            const nextLayer = document.getElementById(`bgLayer${nextLayerNum}`);
+            const animClass = isMovingRight ? 'pan-right-anim' : 'pan-left-anim';
+            nextLayer.className = 'bg-layer';
+            nextLayer.style.backgroundImage = `url('${bgImages[currentImgIndex]}')`;
+            void nextLayer.offsetWidth;
+            nextLayer.className = `bg-layer active ${animClass}`;
+            currentLayer.classList.remove('active');
+            activeLayerNum = nextLayerNum;
+        }
+
+        window.addEventListener('load', () => {
+            initBgSlider();
+            searchInput.focus();
+            renderResults('');
+        });
+    </script>
+    <script>{{SITE_TITLE_JS}}</script>
+</body>
+</html>
