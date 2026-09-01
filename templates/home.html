@@ -8,9 +8,16 @@
     <link rel="canonical" href="{{SITE_URL}}/">
     <link rel="sitemap" type="application/xml" href="{{SITE_URL}}/sitemap.xml">
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+    <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('starkon-theme') || 'dark');</script>
     <style>{{BASE_CSS}}</style>
 </head>
 <body class="home">
+
+    <button class="corner-badge" id="themeToggle" type="button" aria-label="Перемкнути тему">
+        <svg class="theme-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+        <svg class="theme-icon-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+    </button>
+    <div class="corner-badge" id="weatherBadge"></div>
 
     <div class="fixed-header" id="logoHome">
         <div class="fixed-logo">
@@ -259,5 +266,6 @@
         });
     </script>
     <script>{{SITE_TITLE_JS}}</script>
+    <script>{{THEME_WEATHER_JS}}</script>
 </body>
 </html>

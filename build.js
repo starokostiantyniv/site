@@ -6,22 +6,27 @@ const SHEET_CSV_URL = process.env.SHEET_CSV_URL || '';
 
 // українські заголовки в таблиці -> внутрішні поля англійською
 const COLUMN_MAP = {
-    'Назва': 'name',
-    'Категорія': 'category',
-    'Адреса': 'address',
-    'Телефон': 'phone',
-    'Години роботи': 'hours',
-    'Сайт': 'website',
-    'Instagram': 'instagram',
-    'Telegram': 'telegram',
-    'Опис': 'description',
-    'Фото (посилання)': 'photo',
-    'Рейтинг': 'rating',
-    'Відгуки': 'reviews',
-    'Рекомендовано': 'featured',
-    'Теги': 'tags',
-    'Активний': 'active',
-    'Верифіковано': 'verified'
+    'назва': 'name',
+    'категорія': 'category',
+    'адреса': 'address',
+    'телефон': 'phone',
+    'години роботи': 'hours',
+    'години': 'hours',
+    'сайт': 'website',
+    'instagram': 'instagram',
+    'telegram': 'telegram',
+    'опис': 'description',
+    'фото (посилання)': 'photo',
+    'фото': 'photo',
+    'рейтинг': 'rating',
+    'відгуки': 'reviews',
+    'рекомендовано': 'featured',
+    'реком': 'featured',
+    'теги': 'tags',
+    'активний': 'active',
+    'акт': 'active',
+    'верифіковано': 'verified',
+    'верифікація': 'verified'
 };
 
 // мінімальний RFC4180-парсер CSV (лапки, коми та переноси рядків усередині полів)
@@ -50,7 +55,7 @@ function parseCSV(text) {
         .map(r => {
             const obj = {};
             headers.forEach((h, idx) => {
-                const key = COLUMN_MAP[h.trim()];
+                const key = COLUMN_MAP[h.trim().toLowerCase()];
                 if (key) obj[key] = (r[idx] ?? '').trim();
             });
             return obj;
@@ -127,6 +132,51 @@ function slugify(name) {
         .slice(0, 60) || 'zaklad';
 }
 
+// нормалізує назву для порівняння (без регістру, зайвих пробілів, розділових знаків типу лапок)
+function normName(s) {
+    return String(s ?? '').toLowerCase().trim().replace(/["'«»]/g, '').replace(/\s+/g, ' ');
+}
+
+// перший телефон із поля (можуть бути кілька через кому), лише цифри
+function firstPhoneDigits(phone) {
+    const first = String(phone ?? '').split(',')[0];
+    return first.replace(/\D/g, '');
+}
+
+// об'єднує рядки, що описують той самий заклад (та сама назва+телефон,
+// або та сама назва+адреса коли телефону нема) — типово через кілька категорій в таблиці
+function dedupeItems(items) {
+    const merged = new Map();
+    const order = [];
+    for (const item of items) {
+        const phoneKey = firstPhoneDigits(item.phone);
+        const key = phoneKey
+            ? `${normName(item.name)}|${phoneKey}`
+            : `${normName(item.name)}|${normName(item.address)}`;
+        if (!merged.has(key)) {
+            merged.set(key, { ...item });
+            order.push(key);
+            continue;
+        }
+        const base = merged.get(key);
+        // категорії та теги — об'єднуємо, без повторів
+        for (const field of ['category', 'tags']) {
+            const existing = (base[field] || '').split(',').map(s => s.trim()).filter(Boolean);
+            const incoming = (item[field] || '').split(',').map(s => s.trim()).filter(Boolean);
+            for (const v of incoming) if (!existing.includes(v)) existing.push(v);
+            base[field] = existing.join(', ');
+        }
+        // решта полів — лишаємо перше непорожнє значення
+        for (const field of ['address', 'hours', 'website', 'instagram', 'telegram', 'description', 'photo', 'rating', 'reviews']) {
+            if (!base[field] && item[field]) base[field] = item[field];
+        }
+        // featured/verified — досить, щоб хоч один рядок мав "так"
+        if (isFeatured(item)) base.featured = item.featured;
+        if (isVerified(item)) base.verified = item.verified;
+    }
+    return order.map(k => merged.get(k));
+}
+
 function makeUniqueSlugs(items) {
     const seen = new Map();
     return items.map(item => {
@@ -155,6 +205,28 @@ function ensureDir(dir) {
     fs.mkdirSync(dir, { recursive: true });
 }
 
+// копіює все з public/ (картинки фону тощо) у корінь dist/ — рекурсивно
+function copyPublicAssets() {
+    const PUBLIC_DIR = path.join(ROOT, 'public');
+    if (!fs.existsSync(PUBLIC_DIR)) return 0;
+    let count = 0;
+    function walk(src, dest) {
+        for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+            const s = path.join(src, entry.name);
+            const d = path.join(dest, entry.name);
+            if (entry.isDirectory()) {
+                ensureDir(d);
+                walk(s, d);
+            } else {
+                fs.copyFileSync(s, d);
+                count++;
+            }
+        }
+    }
+    walk(PUBLIC_DIR, DIST);
+    return count;
+}
+
 function isFeatured(item) {
     const v = String(item.featured ?? '').trim().toLowerCase();
     return ['так', 'yes', 'true', '1', 'y', 'да'].includes(v);
@@ -178,19 +250,23 @@ async function loadListings() {
         console.log('Завантажую дані з Google Таблиці...');
         const rows = await fetchFromSheet(SHEET_CSV_URL);
         if (!rows.length) throw new Error('Таблиця порожня або не вдалось розпарсити CSV');
-        return makeUniqueSlugs(rows);
+        const deduped = dedupeItems(rows);
+        if (deduped.length < rows.length) {
+            console.log(`Об'єднано дублікатів: ${rows.length - deduped.length} (${rows.length} рядків → ${deduped.length} унікальних закладів)`);
+        }
+        return makeUniqueSlugs(deduped);
     }
     if (!fs.existsSync(DATA_FILE)) {
         throw new Error(`Не знайдено файл даних: ${DATA_FILE}. Вкажи DATA_FILE=... або SHEET_CSV_URL=... (посилання на опубліковану таблицю)`);
     }
     const raw = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     if (!Array.isArray(raw)) throw new Error('listings.json має бути масивом об\'єктів');
-    return makeUniqueSlugs(raw);
+    return makeUniqueSlugs(dedupeItems(raw));
 }
 
 // ---------- рендер сторінки закладу ----------
 
-function renderListingPage(item, baseCss, siteTitleJs) {
+function renderListingPage(item, baseCss, siteTitleJs, themeWeatherJs) {
     const url = `${SITE_URL}/zaklad/${item.slug}/`;
 
     const jsonLd = {
@@ -244,6 +320,7 @@ function renderListingPage(item, baseCss, siteTitleJs) {
         SITE_URL,
         BASE_CSS: baseCss,
         SITE_TITLE_JS: siteTitleJs,
+        THEME_WEATHER_JS: themeWeatherJs,
         JSONLD: JSON.stringify(jsonLd),
         BG_IMAGE: 'img.jpg',
         PHOTO_BLOCK: photoBlock,
@@ -275,9 +352,12 @@ async function build() {
     }
     const baseCss = fs.readFileSync(path.join(TPL, 'base.css'), 'utf8');
     const siteTitleJs = fs.readFileSync(path.join(TPL, 'site-title.js'), 'utf8');
+    const themeWeatherJs = fs.readFileSync(path.join(TPL, 'theme-weather.js'), 'utf8');
 
     rimraf(DIST);
     ensureDir(DIST);
+    const copiedAssets = copyPublicAssets();
+    if (copiedAssets) console.log(`Скопійовано статичних файлів (картинки тощо): ${copiedAssets}`);
 
     // головна — рекомендовані (featured) підіймаємо на початок масиву
     const forHome = [...items].sort((a, b) => (isFeatured(b) ? 1 : 0) - (isFeatured(a) ? 1 : 0));
@@ -285,6 +365,7 @@ async function build() {
         SITE_URL,
         BASE_CSS: baseCss,
         SITE_TITLE_JS: siteTitleJs,
+        THEME_WEATHER_JS: themeWeatherJs,
         LISTINGS_JSON: JSON.stringify(forHome.map(({ name, category, address, phone, hours, rating, reviews, slug, featured, tags, verified }) =>
             ({ name, category, address, phone, hours, rating, reviews, slug, featured: isFeatured({ featured }), tags: tags || '', verified: isVerified({ verified }) })))
     });
@@ -294,7 +375,7 @@ async function build() {
     for (const item of items) {
         const dir = path.join(DIST, 'zaklad', item.slug);
         ensureDir(dir);
-        fs.writeFileSync(path.join(dir, 'index.html'), renderListingPage(item, baseCss, siteTitleJs));
+        fs.writeFileSync(path.join(dir, 'index.html'), renderListingPage(item, baseCss, siteTitleJs, themeWeatherJs));
     }
 
     // sitemap
