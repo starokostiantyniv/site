@@ -3,10 +3,10 @@
     if (!textElement) return;
 
     const sequence = [
-        "СТАРОКОНСТЯНТИНІВ",
-        "STAROKONSTANTYNÓW",
-        "STAROKOSTIANTYNIV",
-        "STAROKOSTJANTYNIW",
+        "Старокостянтинів",
+        "Starokonstantynów",
+        "Starokostiantyniv",
+        "Starokostjantyniw",
         "סטרוקונסטנטינוב",
         "STAROKOSTIANTYNIV.COM"
     ];
