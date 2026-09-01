@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STAROKOSTIANTYNIV.COM — довідник закладів Старокостянтинова</title>
+    <title>STAROKOSTIANTYNIV.COM — головний довідник міста</title>
     <meta name="description" content="Усі заклади Старокостянтинова в одному місці: ресторани, СТО, магазини, послуги. Пошук за назвою, категорією чи адресою.">
     <link rel="canonical" href="{{SITE_URL}}/">
     <link rel="sitemap" type="application/xml" href="{{SITE_URL}}/sitemap.xml">
@@ -51,8 +51,8 @@
             <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span class="row-value" id="detailHours"></span></div>
             <div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="row-value" id="detailRating"></span></div>
             <div class="listing-links">
-                <a id="backToResults" href="#">← Назад</a>
-                <a id="detailFullLink" href="#">Детальніше →</a>
+                <a id="backToResults" href="#">←</a>
+                <a id="detailFullLink" href="#">→</a>
             </div>
         </div>
     </div>
@@ -150,7 +150,7 @@
         function renderItem(item) {
             return `
                 <a class="result-item${item.featured ? ' featured' : ''}" href="${SITE_URL}/zaklad/${item.slug}/" data-slug="${item.slug}">
-                    ${item.featured ? '<div class="result-badge">★ Рекомендовано</div>' : ''}
+                    ${item.featured ? '<div class="result-badge">ПОВАЖНИЙ</div>' : ''}
                     <div class="result-name">${esc(smartQuotes(item.name))}${verifiedMark(item)}</div>
                     <div class="result-category">${esc(item.category)}</div>
                     ${item.address ? `<div class="result-address">${esc(item.address)}</div>` : ''}
@@ -235,7 +235,7 @@
 
         searchInput.addEventListener('input', (e) => renderResults(e.target.value));
 
-        const bgImages = ['img.jpg', 'img2.jpg', 'img3.jpg', 'img4.jpg', 'img5.jpg', 'img6.jpg', 'img7.jpg', 'img8.jpg', 'img9.jpg', 'img10.jpg'];
+        const bgImages = ['img.jpg'];
         let currentImgIndex = 0, isMovingRight = true, activeLayerNum = 1;
 
         function initBgSlider() {

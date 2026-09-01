@@ -1,4 +1,4 @@
-# STAROKOSTIANTYNIV.COM — генератор сайту
+# STAROKOSTIANTYNIV.COM
 
 ## Структура
 - `data/listings.json` — джерело даних (тестові приклади зараз; заміниш на експорт з Google Sheet)
