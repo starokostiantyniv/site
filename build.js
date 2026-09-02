@@ -10,6 +10,8 @@ const COLUMN_MAP = {
     'категорія': 'category',
     'адреса': 'address',
     'телефон': 'phone',
+    '3елефон': 'phone',
+    'тел': 'phone',
     'години роботи': 'hours',
     'години': 'hours',
     'сайт': 'website',
@@ -26,7 +28,8 @@ const COLUMN_MAP = {
     'активний': 'active',
     'акт': 'active',
     'верифіковано': 'verified',
-    'верифікація': 'verified'
+    'верифікація': 'verified',
+    'галочка': 'verified'
 };
 
 // мінімальний RFC4180-парсер CSV (лапки, коми та переноси рядків усередині полів)
@@ -55,11 +58,39 @@ function parseCSV(text) {
         .map(r => {
             const obj = {};
             headers.forEach((h, idx) => {
-                const key = COLUMN_MAP[h.trim().toLowerCase()];
+                const key = resolveColumn(h);
                 if (key) obj[key] = (r[idx] ?? '').trim();
             });
             return obj;
         });
+}
+
+// якщо точної відповідності нема — пробуємо впізнати колонку за характерним фрагментом
+// (рятує від одруків типу "3елефон" замість "Телефон")
+const FUZZY_HINTS = [
+    ['елефон', 'phone'],
+    ['адрес', 'address'],
+    ['категор', 'category'],
+    ['назв', 'name'],
+    ['годин', 'hours'],
+    ['опис', 'description'],
+    ['рейтинг', 'rating'],
+    ['відгук', 'reviews'],
+    ['фото', 'photo'],
+    ['тег', 'tags'],
+    ['рекоменд', 'featured'],
+    ['актив', 'active'],
+    ['верифік', 'verified'],
+    ['галочк', 'verified']
+];
+
+function resolveColumn(header) {
+    const h = header.trim().toLowerCase();
+    if (COLUMN_MAP[h]) return COLUMN_MAP[h];
+    for (const [hint, field] of FUZZY_HINTS) {
+        if (h.includes(hint)) return field;
+    }
+    return null;
 }
 
 async function fetchFromSheet(url) {
@@ -302,9 +333,37 @@ function renderListingPage(item, baseCss, siteTitleJs, themeWeatherJs) {
         ? `<div class="detail-row" style="border-bottom:none;"><strong>Опис</strong> <span>${escHtml(item.description)}</span></div>`
         : '';
 
-    const linkBtn = (href, label) => href
-        ? `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+    // приводимо соцмережі/сайт до повних посилань: у таблиці часто просто "@handle" замість URL
+    function websiteHref(v) {
+        if (!v) return '';
+        v = v.trim();
+        return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+    }
+    function socialHref(v, base) {
+        if (!v) return '';
+        v = v.trim();
+        if (/^https?:\/\//i.test(v)) return v;
+        return `${base}${v.replace(/^@/, '')}`;
+    }
+    function displayText(v) {
+        return v.trim().replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+    }
+
+    const websiteUrl = websiteHref(item.website);
+    const instagramUrl = socialHref(item.instagram, 'https://instagram.com/');
+    const telegramUrl = socialHref(item.telegram, 'https://t.me/');
+
+    const linkRow = (iconSvg, href, text) => href
+        ? `<div class="detail-row"><svg class="row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconSvg}</svg> <a class="row-value row-link" href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${escHtml(text)}</a></div>`
         : '';
+
+    const WEBSITE_ICON = '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/>';
+    const INSTAGRAM_ICON = '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>';
+    const TELEGRAM_ICON = '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>';
+
+    const WEBSITE_ROW = linkRow(WEBSITE_ICON, websiteUrl, displayText(item.website || ''));
+    const INSTAGRAM_ROW = linkRow(INSTAGRAM_ICON, instagramUrl, item.instagram ? `@${item.instagram.trim().replace(/^@/, '')}` : '');
+    const TELEGRAM_ROW = linkRow(TELEGRAM_ICON, telegramUrl, item.telegram ? `@${item.telegram.trim().replace(/^@/, '')}` : '');
 
     return fill(readTpl('listing.html'), {
         NAME: escHtml(smartQuotes(item.name)),
@@ -326,9 +385,9 @@ function renderListingPage(item, baseCss, siteTitleJs, themeWeatherJs) {
         PHOTO_BLOCK: photoBlock,
         FEATURED_BADGE: featuredBadge,
         DESCRIPTION_ROW: descriptionRow,
-        WEBSITE_LINK: linkBtn(item.website, 'Сайт'),
-        INSTAGRAM_LINK: linkBtn(item.instagram, 'Instagram'),
-        TELEGRAM_LINK: linkBtn(item.telegram, 'Telegram')
+        WEBSITE_ROW,
+        INSTAGRAM_ROW,
+        TELEGRAM_ROW
     });
 }
 
